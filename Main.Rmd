@@ -14,8 +14,10 @@ knitr::opts_chunk$set(echo = TRUE)
 The first assignment is to load the delightful traffic accidents data from. Lets take a glimpse.
 
 ```{r include=FALSE}
+#install.packages("vtree")
 library(leaflet)
 suppressPackageStartupMessages(library(lubridate))
+library(vtree)
 suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(tidyverse))
 
@@ -95,12 +97,89 @@ mydata %>%
         xlab("Accident")
 ```
 
-To conclude:
+```{r include=FALSE}
+vtree(mydata, "accident", palette = 3, sortfill = TRUE,  horiz = FALSE)
+```
+
+To conclude the max values by accident and type_acc are:
 ```{r include=TRUE}
-mydata %>% group_by(accident) %>% summarise(n())
+mydata %>% group_by(accident) %>% summarize(Count = n()) %>% filter(Count == max(Count))
+```
+
+```{r include=TRUE}
+mydata %>% group_by(type_acc) %>% summarize(Count = n()) %>% filter(Count == max(Count))
 ```
 
 <h2>Which day in the week has the highest number of accidents?</h2>
+
+First we add the weekday column
+
+```{r include=TRUE}
+mydata$weekday = weekdays(mydata$date)
+glimpse(mydata)
+```
+
+Now we plot the incidents.
+
+```{r include=TRUE}
+mydata %>% 
+  group_by(weekday) %>% 
+  ggplot(aes(x = weekday, fill = weekday)) +
+        geom_bar() +
+        ylab("Number of incidents") +
+        xlab("Weekday")
+```
+
+To conclude - the max incidents are:
+```{r include=TRUE}
+mydata %>% group_by(weekday) %>% summarize(Count = n()) %>% filter(Count == max(Count))
+```
+<h2>For each day in the week find the total number of each kind of accidents?</h2>
+
+Let see the numbers
+```{r include=TRUE}
+my_summarize <- mydata %>% group_by(weekday, type_acc) %>% summarize(Count = n())
+glimpse(my_summarize)
+```
+And now lets visualize
+
+```{r include=TRUE}
+ggplot(data = my_summarize, aes(x = weekday, y=Count, fill=type_acc)) +
+      geom_bar(position="stack", stat="identity") +
+      ylab("Number of incidents") +
+      xlab("Weekday")
+```
+
+<h2>Identify time in the day (the hour) with the highest number of accidents</h2>
+
+Lets add hour in day column:
+
+```{r include=TRUE}
+mydata$hour_in_day = substring(mydata$time, 0, 2)
+glimpse(mydata)
+mydata %>% group_by(hour_in_day) %>% summarise(Count = n())
+```
+
+Lets visualize it:
+
+```{r include=TRUE}
+mydata %>% 
+  group_by(hour_in_day) %>% 
+  ggplot(aes(x = hour_in_day, fill = hour_in_day)) +
+        geom_bar() +
+        ylab("Number of incidents") +
+        xlab("Hour in day")
+```
+
+To conclude:
+
+```{r include=TRUE}
+mydata %>% group_by(hour_in_day) %>% summarize(Count = n()) %>% filter(Count == max(Count))
+```
+
+<h2>What is the most occurring type of the accident during the hour with the highest number of accidents?</h2>
+
+
 
 ## [Assignment Problem 2](http://tanjakec.github.io/Project_DSBC/AssignmentQs.html#Problem_2)
 
