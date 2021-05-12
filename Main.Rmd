@@ -179,7 +179,54 @@ mydata %>% group_by(hour_in_day) %>% summarize(Count = n()) %>% filter(Count == 
 
 <h2>What is the most occurring type of the accident during the hour with the highest number of accidents?</h2>
 
+Lets find the hour with the highest number of accidents.
+```{r include=TRUE}
+max_hour <- mydata %>% group_by(hour_in_day) %>% summarize(Count = n()) %>% filter(Count == max(Count))
+glimpse(max_hour)
+```
 
+We're filtering the data - only the data of that single max hour.
+
+```{r include=TRUE}
+my_max_hour_data <- mydata %>% group_by(type_acc) %>% filter(hour_in_day == max_hour$hour_in_day)
+glimpse(my_max_hour_data)
+my_max_hour_data %>% group_by(type_acc) %>% summarize(Count = n()) %>% filter(Count == max(Count))
+```
+
+Now lets visualize.
+
+```{r include=TRUE}
+my_max_hour_data %>% 
+  group_by(type_acc) %>% 
+  ggplot(aes(x = type_acc, fill = type_acc)) +
+        geom_bar() +
+        ylab("Number of incidents") +
+        xlab("Type of accident")
+```
+<h2>Creat a leafleta interactive map to pinpoint the accidents with the popup message of the description of the accidents.</h2>
+This popup message should appear every time a user clicks on an accident marker.
+
+```{r include=TRUE}
+
+minlat <- min(mydata$lat)
+maxlat <- max(mydata$lat)
+minlng <- min(mydata$long)
+maxlng <- max(mydata$long)
+
+libs <- mydata %>% 
+  leaflet() %>% 
+  # add tiles to the leaflet object
+  addTiles() %>%
+  # setting the corners/centre of the map
+  fitBounds(~minlng, ~minlat, ~maxlng, ~maxlat) %>% 
+  # add the markers with the popups 
+  addCircles(lng = ~long, lat = ~lat,
+             radius = 150, weight = 10, color = "black",
+             fillColor = "red", fillOpacity = 0.7,  
+             popup = ~paste(descrip))
+#print the map
+libs
+```
 
 ## [Assignment Problem 2](http://tanjakec.github.io/Project_DSBC/AssignmentQs.html#Problem_2)
 
