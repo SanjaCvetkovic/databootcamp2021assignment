@@ -20,6 +20,7 @@ suppressPackageStartupMessages(library(lubridate))
 library(vtree)
 suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(GGally))
 
 # read data
 mydata <- read.csv("data/nez-opendata_02_19.csv", 
@@ -206,6 +207,8 @@ my_max_hour_data %>%
 <h2>Creat a leafleta interactive map to pinpoint the accidents with the popup message of the description of the accidents.</h2>
 This popup message should appear every time a user clicks on an accident marker.
 
+Here you go.:)
+
 ```{r include=TRUE}
 
 minlat <- min(mydata$lat)
@@ -229,4 +232,88 @@ libs
 ```
 
 ## [Assignment Problem 2](http://tanjakec.github.io/Project_DSBC/AssignmentQs.html#Problem_2)
+
+<h1>Part I</h1>
+
+<h2>Explain what is meant by the following terms:</h2>
+
+<ul>
+<li>Population - Statistical data set</li>
+<li>Response variable - A response variable is a variable that measures either directly or indirectly the objectives of the analysis.</li>
+<li>Explanatory Variable - An explanatory variable is a variable that may influence the response variable.</li>
+<li>Sample Descriptive Statistics - simple analysis on a sample of the datasource, with the goal of investigating the relationship between variables</li>
+</ul>
+
+<h2>What is the ‘Data Analysis Methodology’, and why is this needed when working with sample data?</h2>
+
+It is the methodology for investigation the relationship between response and explanatory variables.
+The first step is to identify the response variable and the explanatory variable under investigation, which will provide a framework for defining a Data Analysis process to explore the connection between the two variables. By using simple sample descriptive statistics we can start to investigate the nature of the link between the variables. There might be strong evidence within the sample to support a link, or it might lead us to the conclusion that there is no evidence of a link, or that the simple approach is inconclusive and further more sophisticated data analysis is required.
+
+<h2>What are the statistical concepts used to investigate the relationship between a measured response and an attribute explanatory variable? </h2>
+
+
+
+<h2>How are these statistical concepts translated into operational procedures</h2>
+for sample data with:
+<ul>
+<li>an attribute explanatory variable having two levels</li>
+<li>an attribute explanatory variable having three or more levels; hence explain when and why a Tukey test is helpful</li>
+</ul>
+
+<h2>How does multiple regression differ from simple linear regression?</h2>
+We use multiple regression when there are more than one explanatory variables.
+
+<h2>In multiple regression how is the contribution of each individual explanatory variable to the regression model initially assessed?</h2>
+
+<h1>Part II</h1>
+
+```{r include=TRUE}
+fish <- read.csv("data/Fish.csv", 
+                   na.strings = c("","NA"),
+                   stringsAsFactor = FALSE) 
+glimpse(fish)
+```
+
+Lets turn the attribute variable Species into a numerical representation
+```{r include=TRUE}
+fish$Species_num = as.numeric(factor(fish$Species))
+glimpse(fish)
+```
+
+Lets visualize the weight per species to get a grasp
+```{r include=TRUE}
+ggplot(fish, aes(x = Species, y = Weight)) +
+  geom_boxplot(outlier.colour = "hotpink") +
+  geom_jitter(position = position_jitter(width = 0.1, height = 0), alpha = .2) +
+  labs (title= "Fish weight. vs. Species", 
+        x = "Species", y = "Weight") +
+  theme(legend.position = "none", 
+        panel.border = element_rect(fill = NA, 
+                                    colour = "black",
+                                    size = .75),
+        plot.title=element_text(hjust=0.5))
+```
+
+
+Let see the mean values per species
+```{r include=TRUE}
+fish %>% 
+    group_by(Species) %>% 
+    summarise(mean=mean(Weight))
+```
+
+Lets examine the pairwise plot
+
+```{r include=TRUE}
+ggpairs(fish)
+```
+
+Lets try the model with all of the variables
+
+```{r include=TRUE}
+model_1 <- lm(Height ~ ., data = fish) # full stop, . , implies: all other variables in data that do not already appear in the formula
+summary(model_1)
+```
+
+We can see that the lenghts have strong correlations with each other
 
